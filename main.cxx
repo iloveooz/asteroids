@@ -1,6 +1,7 @@
 
 	#include <SFML/Graphics.hpp>
 	#include <cmath>
+	#include <list>
 		
 	using namespace sf;
 	
@@ -66,9 +67,34 @@
 			anim.sprite.setRotation(angle + 90);
 			app.draw(anim.sprite);
 		}
+		
+		virtual ~Entity() { }
+	};
+	
+	class asteroid : public Entity {
+		public:
+		asteroid () {
+			dx = rand() % 8 - 4;
+			dy = rand() % 8 - 4;
+			name = "asteroid";
+		}
+		
+		void update() {
+			x += dx;
+			y += dy;
+			
+			if (x > W) x = 0;
+			if (x < 0) x = W;
+			
+			if (y > H) y = 0;
+			if (y < 0) y = H;
+		}
+			
 	};
 	
 	int main() {
+		
+		srand(time(NULL));
 		
 		// создаём окно
 		RenderWindow app(VideoMode(W, H), "Asteroids!");
@@ -95,13 +121,26 @@
 		
 		// анимированный камень в космосе
 		Animation sRock(t4, 0, 0, 64, 64, 16, 0.2);
-		sRock.sprite.setPosition(400, 400);
 		
-		sExplosion.setPosition(300, 300);
+		//sRock.sprite.setPosition(400, 400);
 		
-		float Frame = 0;
-		float animSpeed = 0.4;
-		int frameCount = 20;
+		// sExplosion.setPosition(300, 300);
+		
+		// двусвязный список сущностей
+		std::list <Entity *> entities;
+		
+		// создание астероидов
+		for (int i = 0; i < 15; i++) {
+			asteroid *a = new asteroid();
+			a->settings(sRock, rand() % W, rand() % H, rand() % 360, 25);
+			// вставка элемента в конец контейнера
+			entities.push_back(a);
+		}
+		
+		
+		// float Frame = 0;
+		// float animSpeed = 0.4;
+		// int frameCount = 20;
 				
 		float x = 300, y = 300;
 		float dx = 0, dy = 0, angle = 0;
@@ -122,10 +161,10 @@
 			}
 			
 			// пример спрайтовой анимации
-			Frame += animSpeed;
+			// Frame += animSpeed;
 			
-			if (Frame > frameCount) Frame -= frameCount;
-			sExplosion.setTextureRect(IntRect(int(Frame) * 50, 0, 50, 50));
+			// if (Frame > frameCount) Frame -= frameCount;
+			// sExplosion.setTextureRect(IntRect(int(Frame) * 50, 0, 50, 50));
 			
 			
 			// поворот вправо
@@ -170,19 +209,36 @@
 			sPlayer.setPosition(x, y);
 			sPlayer.setRotation(angle + 90);
 
-			sRock.update();
+			// sRock.update();
 			/// отображение /// 
 			
+			for (auto i = entities.begin(); i != entities.end();) {
+				Entity *e = *i;
+				e->update();
+				e->anim.update();
+				if (e->life == false) {
+					i = entities.erase(i);
+					delete e;
+				}
+				else
+					i++;
+			}
+						
 			// очистка экрана
 			app.clear();
+			
 			// отображение фона
 			app.draw(sBackground);
+			
 			// отображение игрока
 			app.draw(sPlayer);
 			// отображение взрыва
-			app.draw(sExplosion);
-			// отображение камня
-			app.draw(sRock.sprite);
+			// app.draw(sExplosion);
+			
+			// отображение камней
+			// app.draw(sRock.sprite);
+			for (auto i:entities) i->draw(app);
+			
 			// отображает экран
 			app.display();
 		}
