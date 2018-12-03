@@ -39,6 +39,35 @@
 		}
 	};
 	
+	class Entity {
+		public:
+		float x, y;
+		float dx, dy;
+		float R, angle;
+		
+		bool life = 1;
+		
+		std::string name;
+		Animation anim;
+		
+		Entity () { life = 1; }
+		void settings (Animation &a, int X, int Y, float Angle = 0, int radius = 1) {
+			x = X;
+			y = Y;
+			anim = a;
+			angle = Angle;
+			R = radius;
+		}
+		
+		virtual void update() { }
+		
+		void draw(RenderWindow &app) {
+			anim.sprite.setPosition(x, y);
+			anim.sprite.setRotation(angle + 90);
+			app.draw(anim.sprite);
+		}
+	};
+	
 	int main() {
 		
 		// создаём окно
@@ -94,6 +123,7 @@
 			
 			// пример спрайтовой анимации
 			Frame += animSpeed;
+			
 			if (Frame > frameCount) Frame -= frameCount;
 			sExplosion.setTextureRect(IntRect(int(Frame) * 50, 0, 50, 50));
 			
@@ -107,6 +137,8 @@
 				thrust = true;
 			else
 				thrust = false;
+				
+			// if (Keyboard::isKeyPressed(Keyboard::Down)) thrust = false;
 			
 			// космический корабль - движение//	
 			if (thrust) {
