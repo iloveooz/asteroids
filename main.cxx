@@ -92,6 +92,28 @@
 			
 	};
 	
+	class bullet : public Entity {
+		public:
+		bullet() {
+			name = "bullet";
+		}
+		
+		void update() {
+			dx = cos(angle * DEGTORAD) * 6;
+			dy = sin(angle * DEGTORAD) * 6;
+			x += dx;
+			y += dy;
+			if (x > W || x < 0 || y > H || y < 0) life = 0;
+		}
+		
+	};
+	
+	bool isCollide(Entity *a, Entity *b) { 
+		return 	(b->x - a->x) * (b->x - a->x) + 
+				(b->y - a->y) * (b->y - a->y) < (a->R + b->R) * (a->R + b->R);
+	} 
+	
+	
 	int main() {
 		
 		srand(time(NULL));
@@ -101,18 +123,22 @@
 		app.setFramerateLimit(60);
 		
 		// создаём текстуры
-		Texture t1, t2, t3, t4;
+		Texture t1, t2, t3, t4, t5, t6;
 		
 		// загружаем текстуры из файлов
 		t1.loadFromFile("images/spaceship.png");
 		t2.loadFromFile("images/background.jpg");
-		t3.loadFromFile("images/explosions/type_A.png");
+		t3.loadFromFile("images/explosions/type_C.png");
 		t4.loadFromFile("images/rock.png");
+		t5.loadFromFile("images/fire_blue.png");
+		t6.loadFromFile("images/rock_small.png");
 		
 		// создаём спрайты
 		Sprite sPlayer(t1);
 		Sprite sBackground(t2);
 		Sprite sExplosion(t3);
+		
+		Animation sBullet(t5, 0, 0, 32, 64, 16, 0.8);
 		
 		// отобразить кусок текстуры
 		sPlayer.setTextureRect(IntRect(40, 0, 40, 40));
@@ -121,10 +147,11 @@
 		
 		// анимированный камень в космосе
 		Animation sRock(t4, 0, 0, 64, 64, 16, 0.2);
+		Animation sRockSmall(t6, 0, 0, 64, 64, 16, 0.4);
 		
 		//sRock.sprite.setPosition(400, 400);
 		
-		// sExplosion.setPosition(300, 300);
+		sExplosion.setPosition(300, 300);
 		
 		// двусвязный список сущностей
 		std::list <Entity *> entities;
@@ -132,11 +159,13 @@
 		// создание астероидов
 		for (int i = 0; i < 15; i++) {
 			asteroid *a = new asteroid();
+			asteroid *sr = new asteroid();
 			a->settings(sRock, rand() % W, rand() % H, rand() % 360, 25);
+			sr->settings(sRockSmall, rand() % W, rand() % H, rand() % 360, 15);
 			// вставка элемента в конец контейнера
 			entities.push_back(a);
+			entities.push_back(sr);
 		}
-		
 		
 		// float Frame = 0;
 		// float animSpeed = 0.4;
@@ -147,9 +176,6 @@
 		
 		bool thrust;
 		
-		
-		
-		
 		// игровой цикл, пока открыто окно
 		while (app.isOpen()) {
 			// событие
@@ -158,14 +184,21 @@
 			while (app.pollEvent(event)) {
 				if (event.type == Event::Closed)
 				app.close();
+				
+				if (event.type == Event::KeyPressed) 
+					if (event.key.code == Keyboard::Space) {
+						bullet *b = new bullet();
+						b->settings(sBullet, x, y, angle, 10);
+						entities.push_back(b);
+					}
+				
 			}
 			
 			// пример спрайтовой анимации
-			// Frame += animSpeed;
+			Frame += animSpeed;
 			
-			// if (Frame > frameCount) Frame -= frameCount;
-			// sExplosion.setTextureRect(IntRect(int(Frame) * 50, 0, 50, 50));
-			
+			if (Frame > frameCount) Frame -= frameCount;
+			sExplosion.setTextureRect(IntRect(int(Frame) * 50, 0, 50, 50));
 			
 			// поворот вправо
 			if (Keyboard::isKeyPressed(Keyboard::Right)) angle += 3;
@@ -176,7 +209,15 @@
 				thrust = true;
 			else
 				thrust = false;
-				
+			
+			for (auto a:entities) 
+				for (auto b:entities) 
+					if (a->name == "asteroid" && b->name == "bullet")
+						if (isCollide(a, b)) {
+							a->life = false;
+							b->life = false;
+						}
+							
 			// if (Keyboard::isKeyPressed(Keyboard::Down)) thrust = false;
 			
 			// космический корабль - движение//	
@@ -242,7 +283,6 @@
 			// отображает экран
 			app.display();
 		}
-		
 		
 		return 0;
 	}
