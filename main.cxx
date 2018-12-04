@@ -2,6 +2,7 @@
 	#include <SFML/Graphics.hpp>
 	#include <cmath>
 	#include <list>
+	#include <iostream>
 		
 	using namespace sf;
 	
@@ -38,6 +39,10 @@
 			if (Frame >= n) Frame -= n;
 			if (n > 0) sprite.setTextureRect(frames[int(Frame)]);
 		}
+		
+		bool isEnd() {
+			return Frame + speed >= frames.size();
+		}
 	};
 	
 	class Entity {
@@ -52,6 +57,7 @@
 		Animation anim;
 		
 		Entity () { life = 1; }
+		
 		void settings (Animation &a, int X, int Y, float Angle = 0, int radius = 1) {
 			x = X;
 			y = Y;
@@ -66,6 +72,7 @@
 			anim.sprite.setPosition(x, y);
 			anim.sprite.setRotation(angle + 90);
 			app.draw(anim.sprite);
+			
 		}
 		
 		virtual ~Entity() { }
@@ -118,6 +125,8 @@
 		
 		srand(time(NULL));
 		
+		std::cout << "START!" << '\n';
+		
 		// создаём окно
 		RenderWindow app(VideoMode(W, H), "Asteroids!");
 		app.setFramerateLimit(60);
@@ -132,12 +141,15 @@
 		t4.loadFromFile("images/rock.png");
 		t5.loadFromFile("images/fire_blue.png");
 		t6.loadFromFile("images/rock_small.png");
+
+		t1.setSmooth(true);
+		t2.setSmooth(true);
 		
 		// создаём спрайты
 		Sprite sPlayer(t1);
 		Sprite sBackground(t2);
-		Sprite sExplosion(t3);
-		
+		// Sprite sExplosion(t3);
+				
 		Animation sBullet(t5, 0, 0, 32, 64, 16, 0.8);
 		
 		// отобразить кусок текстуры
@@ -147,17 +159,20 @@
 		
 		// анимированный камень в космосе
 		Animation sRock(t4, 0, 0, 64, 64, 16, 0.2);
+		// анимированный маленький камень в космосе
 		Animation sRockSmall(t6, 0, 0, 64, 64, 16, 0.4);
+		// анимированный взрыв
+		Animation sExplosion(t3, 0, 0, 256, 256, 48, 0.6);
 		
 		//sRock.sprite.setPosition(400, 400);
 		
-		sExplosion.setPosition(300, 300);
+		// sExplosion.setPosition(300, 300);
 		
 		// двусвязный список сущностей
 		std::list <Entity *> entities;
 		
 		// создание астероидов
-		for (int i = 0; i < 15; i++) {
+		for (int i = 0; i < 50; i++) {
 			asteroid *a = new asteroid();
 			asteroid *sr = new asteroid();
 			a->settings(sRock, rand() % W, rand() % H, rand() % 360, 25);
@@ -195,10 +210,10 @@
 			}
 			
 			// пример спрайтовой анимации
-			Frame += animSpeed;
+			// Frame += animSpeed;
 			
-			if (Frame > frameCount) Frame -= frameCount;
-			sExplosion.setTextureRect(IntRect(int(Frame) * 50, 0, 50, 50));
+			// if (Frame > frameCount) Frame -= frameCount;
+			// sExplosion.setTextureRect(IntRect(int(Frame) * 50, 0, 50, 50));
 			
 			// поворот вправо
 			if (Keyboard::isKeyPressed(Keyboard::Right)) angle += 3;
@@ -210,13 +225,26 @@
 			else
 				thrust = false;
 			
+			// цикл проверки на столкновение
 			for (auto a:entities) 
 				for (auto b:entities) 
 					if (a->name == "asteroid" && b->name == "bullet")
 						if (isCollide(a, b)) {
 							a->life = false;
 							b->life = false;
+							
+							Entity *ex = new Entity();
+							ex->settings(sExplosion, a->x, a->y);
+							ex->name = "explosion";
+							entities.push_back(ex);
+							
 						}
+			
+			for (auto ex:entities)
+				if (ex->name == "explosion")
+					if (ex->anim.isEnd()) {
+						ex->life = 0;
+					}
 							
 			// if (Keyboard::isKeyPressed(Keyboard::Down)) thrust = false;
 			
@@ -253,6 +281,7 @@
 			// sRock.update();
 			/// отображение /// 
 			
+			// цикл поиска и удаления погибших сущностей
 			for (auto i = entities.begin(); i != entities.end();) {
 				Entity *e = *i;
 				e->update();
