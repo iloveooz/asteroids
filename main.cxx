@@ -5,12 +5,12 @@
 	#include <iostream>
 		
 	using namespace sf;
-	
+
 	const int W = 1200;
 	const int H = 800;
-	
+
 	float DEGTORAD = 0.017453f;
-	
+
 	class Animation {
 		public:
 		float Frame; 
@@ -18,7 +18,7 @@
 		
 		Sprite sprite;
 		std::vector <IntRect> frames;
-		
+	
 		Animation () {}
 		
 		Animation (Texture &t, int x, int y, int w, int h, int count, float Speed) {
@@ -44,7 +44,7 @@
 			return Frame + speed >= frames.size();
 		}
 	};
-	
+
 	class Entity {
 		public:
 		float x, y;
@@ -77,7 +77,7 @@
 		
 		virtual ~Entity() { }
 	};
-	
+
 	class asteroid : public Entity {
 		public:
 		asteroid () {
@@ -98,7 +98,7 @@
 		}
 			
 	};
-	
+
 	class bullet : public Entity {
 		public:
 		bullet() {
@@ -114,13 +114,13 @@
 		}
 		
 	};
-	
+
 	bool isCollide(Entity *a, Entity *b) { 
 		return 	(b->x - a->x) * (b->x - a->x) + 
 				(b->y - a->y) * (b->y - a->y) < (a->R + b->R) * (a->R + b->R);
 	} 
-	
-	
+
+
 	int main() {
 		
 		srand(time(NULL));
@@ -130,6 +130,8 @@
 		// создаём окно
 		RenderWindow app(VideoMode(W, H), "Asteroids!");
 		app.setFramerateLimit(60);
+		
+		std::vector <int> vec;
 		
 		// создаём текстуры
 		Texture t1, t2, t3, t4, t5, t6;
@@ -169,10 +171,10 @@
 		// sExplosion.setPosition(300, 300);
 		
 		// двусвязный список сущностей
-		std::list <Entity *> entities;
+		std::list <Entity *> entities; 
 		
 		// создание астероидов
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 25; i++) {
 			asteroid *a = new asteroid();
 			asteroid *sr = new asteroid();
 			a->settings(sRock, rand() % W, rand() % H, rand() % 360, 25);
