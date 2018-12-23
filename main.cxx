@@ -2,6 +2,8 @@
 	#include <SFML/Graphics.hpp>
 	#include <cmath>
 	#include <list>
+	#include <vector>
+	#include <deque>
 	#include <iostream>
 		
 	using namespace sf;
@@ -170,8 +172,12 @@
 		
 		// sExplosion.setPosition(300, 300);
 		
+		
+		
 		// двусвязный список сущностей
 		std::list <Entity *> entities; 
+		
+		
 		
 		// создание астероидов
 		for (int i = 0; i < 25; i++) {
