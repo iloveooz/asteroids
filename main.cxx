@@ -13,6 +13,7 @@
 
 	float DEGTORAD = 0.017453f;
 
+
 	class Animation {
 		public:
 		float Frame; 
@@ -47,6 +48,7 @@
 		}
 	};
 
+
 	class Entity {
 		public:
 		float x, y;
@@ -80,6 +82,7 @@
 		virtual ~Entity() { }
 	};
 
+
 	class asteroid : public Entity {
 		public:
 		asteroid () {
@@ -100,6 +103,7 @@
 		}
 			
 	};
+
 
 	class bullet : public Entity {
 		public:
