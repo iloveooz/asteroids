@@ -76,7 +76,6 @@
 			anim.sprite.setPosition(x, y);
 			anim.sprite.setRotation(angle + 90);
 			app.draw(anim.sprite);
-			
 		}
 		
 		virtual ~Entity() { }
