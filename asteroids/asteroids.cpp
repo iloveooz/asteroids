@@ -316,9 +316,21 @@ int main() {
 
 			if (event.type == sf::Event::KeyPressed)
 				if (event.key.code == sf::Keyboard::Space) {
-					bullet *bul = new bullet();
-					bul->settings(sBullet, p->x, p->y, p->angle, 10);
-					entities.push_back(bul);
+
+					bullet *bul1 = new bullet();
+					bullet *bul2 = new bullet();
+
+					int X1 = p->x + 15 * sin(p->angle);
+					int Y1 = p->y + 15 * cos(p->angle);
+
+					int X2 = p->x + 15 * sin(p->angle + 180);
+					int Y2 = p->y + 15 * cos(p->angle + 180);
+
+					bul1->settings(sBullet, X1, Y1, p->angle, 10);
+					bul2->settings(sBullet, X2, Y2, p->angle, 10);
+
+					entities.push_back(bul1);
+					entities.push_back(bul2);
 				}
 		}
 
@@ -346,7 +358,7 @@ int main() {
 						e->name = "explosion";
 						entities.push_back(e);
 
-						for (int i = 0; i < 5; i++) { // 5 - количество астероидов
+						for (int i = 0; i < 1; i++) { // 5 - количество астероидов
 							if (a->R == 5 || a->name == "asteroidSmall") continue;
 							Entity *e = new asteroidSmall();
 							e->settings(sRock_small, a->x + rand() % 50, a->y + rand() % 50, rand() % 360, 15);
