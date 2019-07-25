@@ -1,0 +1,6 @@
+*.dll
+*/Debug
+*/Release
+/.vs
+*.pdb
+*.exe
