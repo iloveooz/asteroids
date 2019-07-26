@@ -156,28 +156,33 @@ public:
 };
 
 class rotateBullet : public Entity {
-	int rotateBulletAngle;
-	int rotateBulletRadius;
+	double rotateBulletRadius;
 	int x0;
 	int y0;
 public:
 	rotateBullet() {
 		name = "rotateBullet";
-		rotateBulletAngle = 0;
 		rotateBulletRadius = 0;
 		x0 = x;
 		y0 = y;
 	}
 
 	void update() {
-		rotateBulletAngle++;
-		rotateBulletRadius++;
-		
-		dx = x0 + rotateBulletRadius * cos(rotateBulletAngle * DEGTORAD);
-		dy = y0 + rotateBulletRadius * sin(rotateBulletAngle * DEGTORAD);
+		rotateBulletRadius += 0.2;
+		dx = x0 + rotateBulletRadius * cos(angle++ * DEGTORAD);
+		dy = y0 + rotateBulletRadius * sin(angle++ * DEGTORAD);
 
-		x += dx / rotateBulletRadius;
-		y += dy / rotateBulletRadius;
+		int maxSpeed = 15;
+
+		float speed = sqrt(dx * dx + dy * dy);
+
+		if (speed > maxSpeed) {
+			dx *= maxSpeed / speed;
+			dy *= maxSpeed / speed;
+		}
+
+		x += dx;
+		y += dy;
 
 		if (x > W || x < 0 || y > H || y < 0)
 			life = 0;
@@ -204,8 +209,8 @@ public:
 		}
 
 		if (decelerate) {
-			dx *= 0.96;
-			dy *= 0.96;
+			dx *= 0.97;
+			dy *= 0.97;
 		}
 
 		int maxSpeed = 15;
@@ -372,19 +377,19 @@ int main() {
 					int X1 = p->x + 30 * cos((p->angle - 90) * DEGTORAD);
 					int Y1 = p->y + 30 * sin((p->angle - 90) * DEGTORAD);
 
-					int X2 = p->x + 30 * cos((p->angle + 90) * DEGTORAD);
-					int Y2 = p->y + 30 * sin((p->angle + 90) * DEGTORAD);
+					int X2 = p->x + 30 * cos((p->angle) * DEGTORAD);
+					int Y2 = p->y + 30 * sin((p->angle) * DEGTORAD);
 
-					int X3 = p->x + 30 * cos((p->angle) * DEGTORAD);
-					int Y3 = p->y + 30 * sin((p->angle) * DEGTORAD);
+					int X3 = p->x + 30 * cos((p->angle + 90) * DEGTORAD);
+					int Y3 = p->y + 30 * sin((p->angle + 90) * DEGTORAD);
 
 					int X4 = p->x + 30 * cos((p->angle + 180) * DEGTORAD);
 					int Y4 = p->y + 30 * sin((p->angle + 180) * DEGTORAD);
 
 					bul1->settings(sBullet, X1, Y1, p->angle, 10);
-					bul2->settings(sBullet, X2, Y2, p->angle, 10);
-					bul3->settings(sBullet, X3, Y3, p->angle, 10);
-					bul4->settings(sBullet, X4, Y4, p->angle, 10);
+					bul2->settings(sBullet, X2, Y2, p->angle + 90, 10);
+					bul3->settings(sBullet, X3, Y3, p->angle + 180, 10);
+					bul4->settings(sBullet, X4, Y4, p->angle + 270, 10);
 
 					entities.push_back(bul1);
 					entities.push_back(bul2);
@@ -407,7 +412,8 @@ int main() {
 
 		for (auto a : entities)
 			for (auto b : entities) {
-				if ((a->name == "asteroidBig" && b->name == "bullet") || (a->name == "asteroidSmall" && b->name == "bullet")) {
+				if ((a->name == "asteroidBig" && b->name == "bullet") || (a->name == "asteroidSmall" && b->name == "bullet") || 
+					(a->name == "asteroidBig" && b->name == "rotateBullet") || (a->name == "asteroidSmall" && b->name == "rotateBullet")) {
 					if (isCollide(a, b)) {
 						a->life = false;
 						b->life = false;
