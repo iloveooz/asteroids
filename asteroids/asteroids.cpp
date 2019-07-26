@@ -21,9 +21,9 @@ public:
 	sf::Sprite sprite;
 	std::vector<sf::IntRect> frames;
 
-	Animation(){}
+	Animation() {}
 
-	Animation (sf::Texture &t, int x, int y, int w, int h, int count, float Speed) {
+	Animation(sf::Texture &t, int x, int y, int w, int h, int count, float Speed) {
 		Frame = 0;
 		speed = Speed;
 
@@ -38,9 +38,9 @@ public:
 	void update() {
 		Frame += speed;
 		int n = frames.size();
-		if (Frame >= n) 
+		if (Frame >= n)
 			Frame -= n;
-		if (n > 0) 
+		if (n > 0)
 			sprite.setTextureRect(frames[int(Frame)]);
 	}
 
@@ -65,15 +65,15 @@ public:
 		life = 1;
 	}
 
-	void settings(Animation &a ,int X, int Y, float Angle = 0, int radius = 1) {
+	void settings(Animation &a, int X, int Y, float Angle = 0, int radius = 1) {
 		anim = a;
-		x = X; 
+		x = X;
 		y = Y;
 		angle = Angle;
 		R = radius;
 	}
 
-	virtual void update(){};
+	virtual void update() {};
 
 	void draw(sf::RenderWindow &app) {
 		anim.sprite.setPosition(x, y);
@@ -86,7 +86,7 @@ public:
 		circle.setOrigin(R, R);
 	}
 
-	virtual ~Entity(){};
+	virtual ~Entity() {};
 };
 
 class asteroidBig : public Entity {
@@ -106,7 +106,7 @@ public:
 		x += dx;
 		y += dy;
 
-		if (x > W) x = 0;  
+		if (x > W) x = 0;
 		if (x < 0) x = W;
 		if (y > H) y = 0;
 		if (y < 0) y = H;
@@ -137,7 +137,7 @@ public:
 	}
 };
 
-class bullet: public Entity {
+class bullet : public Entity {
 public:
 	bullet() {
 		name = "bullet";
@@ -146,17 +146,45 @@ public:
 	void update() {
 		dx = cos(angle * DEGTORAD) * 10;
 		dy = sin(angle * DEGTORAD) * 10;
-  
+
 		x += dx;
 		y += dy;
 
-		if (x > W || x < 0 || y > H || y < 0) 
+		if (x > W || x < 0 || y > H || y < 0)
 			life = 0;
 	}
 };
 
+class rotateBullet : public Entity {
+	int rotateBulletAngle;
+	int rotateBulletRadius;
+	int x0;
+	int y0;
+public:
+	rotateBullet() {
+		name = "rotateBullet";
+		rotateBulletAngle = 0;
+		rotateBulletRadius = 0;
+		x0 = x;
+		y0 = y;
+	}
 
-class player: public Entity {
+	void update() {
+		rotateBulletAngle++;
+		rotateBulletRadius++;
+		
+		dx = x0 + rotateBulletRadius * cos(rotateBulletAngle * DEGTORAD);
+		dy = y0 + rotateBulletRadius * sin(rotateBulletAngle * DEGTORAD);
+
+		x += dx / rotateBulletRadius;
+		y += dy / rotateBulletRadius;
+
+		if (x > W || x < 0 || y > H || y < 0)
+			life = 0;
+	}
+};
+
+class player : public Entity {
 public:
 	bool thrust;
 	bool decelerate;
@@ -166,16 +194,16 @@ public:
 	}
 
 	void update() {
-		if (thrust) { 
+		if (thrust) {
 			dx += cos(angle * DEGTORAD) * 0.2;
-			dy += sin(angle * DEGTORAD) * 0.2; 
+			dy += sin(angle * DEGTORAD) * 0.2;
 		}
 		else {
 			dx *= 0.99;
 			dy *= 0.99;
 		}
 
-		if (decelerate)	{
+		if (decelerate) {
 			dx *= 0.96;
 			dy *= 0.96;
 		}
@@ -184,7 +212,7 @@ public:
 
 		float speed = sqrt(dx * dx + dy * dy);
 
-		if (speed > maxSpeed) { 
+		if (speed > maxSpeed) {
 			dx *= maxSpeed / speed;
 			dy *= maxSpeed / speed;
 		}
@@ -192,7 +220,7 @@ public:
 		x += dx;
 		y += dy;
 
-		if (x > W) x = 0; 
+		if (x > W) x = 0;
 		if (x < 0) x = W;
 		if (y > H) y = 0;
 		if (y < 0) y = H;
@@ -284,7 +312,7 @@ int main() {
 
 	std::list<Entity*> entities;
 
-	for(int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++) {
 		switch (rand() % 2) {
 		case 0: {
 			Entity *aB = new asteroidBig();
@@ -317,8 +345,8 @@ int main() {
 			if (event.type == sf::Event::KeyPressed)
 				if (event.key.code == sf::Keyboard::Space) {
 
-					bullet *bul1 = new bullet();
-					bullet *bul2 = new bullet();
+					Entity *bul1 = new bullet();
+					Entity *bul2 = new bullet();
 
 					int X1 = p->x + 15 * cos((p->angle - 90) * DEGTORAD);
 					int Y1 = p->y + 15 * sin((p->angle - 90) * DEGTORAD);
@@ -332,6 +360,37 @@ int main() {
 					entities.push_back(bul1);
 					entities.push_back(bul2);
 				}
+
+			if (event.type == sf::Event::KeyPressed)
+				if (event.key.code == sf::Keyboard::S) {
+
+					Entity *bul1 = new rotateBullet();
+					Entity *bul2 = new rotateBullet();
+					Entity *bul3 = new rotateBullet();
+					Entity *bul4 = new rotateBullet();
+
+					int X1 = p->x + 30 * cos((p->angle - 90) * DEGTORAD);
+					int Y1 = p->y + 30 * sin((p->angle - 90) * DEGTORAD);
+
+					int X2 = p->x + 30 * cos((p->angle + 90) * DEGTORAD);
+					int Y2 = p->y + 30 * sin((p->angle + 90) * DEGTORAD);
+
+					int X3 = p->x + 30 * cos((p->angle) * DEGTORAD);
+					int Y3 = p->y + 30 * sin((p->angle) * DEGTORAD);
+
+					int X4 = p->x + 30 * cos((p->angle + 180) * DEGTORAD);
+					int Y4 = p->y + 30 * sin((p->angle + 180) * DEGTORAD);
+
+					bul1->settings(sBullet, X1, Y1, p->angle, 10);
+					bul2->settings(sBullet, X2, Y2, p->angle, 10);
+					bul3->settings(sBullet, X3, Y3, p->angle, 10);
+					bul4->settings(sBullet, X4, Y4, p->angle, 10);
+
+					entities.push_back(bul1);
+					entities.push_back(bul2);
+					entities.push_back(bul3);
+					entities.push_back(bul4);
+				}
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
@@ -340,14 +399,14 @@ int main() {
 			p->angle -= 3;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 			p->thrust = true;
-		else 
+		else
 			p->thrust = false;
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 			p->decelerate = true;
 
-		for(auto a:entities)
-			for(auto b:entities) {
+		for (auto a : entities)
+			for (auto b : entities) {
 				if ((a->name == "asteroidBig" && b->name == "bullet") || (a->name == "asteroidSmall" && b->name == "bullet")) {
 					if (isCollide(a, b)) {
 						a->life = false;
@@ -430,10 +489,10 @@ int main() {
 
 		if (p->thrust)
 			p->anim = sPlayer_go;
-		else   
+		else
 			p->anim = sPlayer;
 
-		for(auto e:entities)
+		for (auto e : entities)
 			if (e->name == "explosion")
 				if (e->anim.isEnd())
 					e->life = 0;
@@ -446,18 +505,18 @@ int main() {
 
 		//if (rand)
 
-		for(auto i = entities.begin(); i != entities.end();) {
+		for (auto i = entities.begin(); i != entities.end();) {
 			Entity *e = *i;
 
 			e->update();
 			e->anim.update();
 
 			if (e->life == false) {
-				i = entities.erase(i); 
+				i = entities.erase(i);
 				delete e;
 				std::cout << Entity::countEntity << '\n';
 			}
-			else 
+			else
 				i++;
 		}
 
@@ -473,10 +532,10 @@ int main() {
 			if (boss && a->name == "enemy") {
 				int dd = rand() % 2;
 				switch (dd) {
-				case 1: 
+				case 1:
 					//a->angle += rand() % 1; 
 					break;
-				case 2: 
+				case 2:
 					//a->angle -= rand() % 10; 
 					break;
 				default:
@@ -492,7 +551,7 @@ int main() {
 		//////draw//////
 		app.draw(background);
 
-		for(auto i:entities)
+		for (auto i : entities)
 			i->draw(app);
 
 		app.display();
