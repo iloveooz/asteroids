@@ -320,11 +320,11 @@ int main() {
 					bullet *bul1 = new bullet();
 					bullet *bul2 = new bullet();
 
-					int X1 = p->x + 15 * sin(p->angle);
-					int Y1 = p->y + 15 * cos(p->angle);
+					int X1 = p->x + 15 * cos((p->angle - 90) * DEGTORAD);
+					int Y1 = p->y + 15 * sin((p->angle - 90) * DEGTORAD);
 
-					int X2 = p->x + 15 * sin(p->angle + 180);
-					int Y2 = p->y + 15 * cos(p->angle + 180);
+					int X2 = p->x + 15 * cos((p->angle + 90) * DEGTORAD);
+					int Y2 = p->y + 15 * sin((p->angle + 90) * DEGTORAD);
 
 					bul1->settings(sBullet, X1, Y1, p->angle, 10);
 					bul2->settings(sBullet, X2, Y2, p->angle, 10);
