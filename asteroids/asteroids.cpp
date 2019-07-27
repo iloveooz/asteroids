@@ -1,6 +1,5 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
-#include <SFML/System.hpp>
 #include <SFML/Network.hpp>
 #include <SFML/Audio.hpp>
 #include <ctime>
@@ -189,12 +188,12 @@ public:
 	}
 };
 
-class player : public Entity {
+class Player : public Entity {
 public:
 	bool thrust;
 	bool decelerate;
 
-	player() {
+	Player() {
 		name = "player";
 	}
 
@@ -233,10 +232,10 @@ public:
 };
 
 class Enemy : public Entity {
+	Player *player_;
 public:
-	Enemy() {
-		dx = rand() % 6 - 3;
-		dy = rand() % 6 - 3;
+	Enemy(Player &player) {
+		player_ = &player;
 		name = "enemy";
 		countEntity++;
 	}
@@ -247,6 +246,8 @@ public:
 
 	void update() {
 		if (move) {
+			dx = player_->x;
+			dy = player_->y;
 			dx += sqrt(angle * DEGTORAD) * 0.2;
 			dy += sqrt(angle * DEGTORAD) * 0.2;
 		}
@@ -255,7 +256,7 @@ public:
 			dy *= 0.99;
 		}
 
-		int maxSpeed = 15;
+		int maxSpeed = 3;
 
 		float speed = sqrt(dx * dx + dy * dy);
 		if (speed > maxSpeed) {
@@ -263,8 +264,8 @@ public:
 			dy *= maxSpeed / speed;
 		}
 
-		//x += dx;
-		//y += dy;
+		x += dx;
+		y += dy;
 
 		// проверка на выход за границы окна
 		if (x > W) x = 0;
@@ -281,9 +282,9 @@ bool isCollide(Entity *a, Entity *b) {
 int	Entity::countEntity = 0;
 
 int main() {
-	srand(time(0));
+	srand(time(nullptr));
 	sf::RenderWindow app(sf::VideoMode(W, H), "Asteroids!");
-	app.setFramerateLimit(60);
+	// app.setFramerateLimit(60);
 
 	sf::Texture t1, t2, t3, t4, t5, t6, t7, t8;
 
@@ -317,7 +318,7 @@ int main() {
 
 	std::list<Entity*> entities;
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 1; i++) {
 		switch (rand() % 2) {
 		case 0: {
 			Entity *aB = new asteroidBig();
@@ -336,9 +337,9 @@ int main() {
 		}
 	}
 
-	player *p = new player();
-	p->settings(sPlayer, 200, 200, 0, 20);
-	entities.push_back(p);
+	Player *player = new Player();
+	player->settings(sPlayer, 200, 200, 0, 20);
+	entities.push_back(player);
 
 	/////main loop/////
 	while (app.isOpen()) {
@@ -349,66 +350,49 @@ int main() {
 
 			if (event.type == sf::Event::KeyPressed)
 				if (event.key.code == sf::Keyboard::Space) {
-
-					Entity *bul1 = new bullet();
-					Entity *bul2 = new bullet();
-
-					int X1 = p->x + 15 * cos((p->angle - 90) * DEGTORAD);
-					int Y1 = p->y + 15 * sin((p->angle - 90) * DEGTORAD);
-
-					int X2 = p->x + 15 * cos((p->angle + 90) * DEGTORAD);
-					int Y2 = p->y + 15 * sin((p->angle + 90) * DEGTORAD);
-
-					bul1->settings(sBullet, X1, Y1, p->angle, 10);
-					bul2->settings(sBullet, X2, Y2, p->angle, 10);
-
-					entities.push_back(bul1);
-					entities.push_back(bul2);
+					for (unsigned int i = 0; i < 2; i++) {
+						Entity *bul = new bullet();
+						int X = 0;
+						int Y = 0;
+						switch (i) {
+						case 0:
+							X = player->x + 15 * cos((player->angle - 90) * DEGTORAD);
+							Y = player->y + 15 * sin((player->angle - 90) * DEGTORAD);
+							break;
+						case 1:
+							X = player->x + 15 * cos((player->angle + 90) * DEGTORAD);
+							Y = player->y + 15 * sin((player->angle + 90) * DEGTORAD);
+							break;
+						}
+						bul->settings(sBullet, X, Y, player->angle, 10);
+						entities.push_back(bul);
+					}
 				}
 
 			if (event.type == sf::Event::KeyPressed)
 				if (event.key.code == sf::Keyboard::S) {
 
-					Entity *bul1 = new rotateBullet();
-					Entity *bul2 = new rotateBullet();
-					Entity *bul3 = new rotateBullet();
-					Entity *bul4 = new rotateBullet();
-
-					int X1 = p->x + 30 * cos((p->angle - 90) * DEGTORAD);
-					int Y1 = p->y + 30 * sin((p->angle - 90) * DEGTORAD);
-
-					int X2 = p->x + 30 * cos((p->angle) * DEGTORAD);
-					int Y2 = p->y + 30 * sin((p->angle) * DEGTORAD);
-
-					int X3 = p->x + 30 * cos((p->angle + 90) * DEGTORAD);
-					int Y3 = p->y + 30 * sin((p->angle + 90) * DEGTORAD);
-
-					int X4 = p->x + 30 * cos((p->angle + 180) * DEGTORAD);
-					int Y4 = p->y + 30 * sin((p->angle + 180) * DEGTORAD);
-
-					bul1->settings(sBullet, X1, Y1, p->angle, 10);
-					bul2->settings(sBullet, X2, Y2, p->angle + 90, 10);
-					bul3->settings(sBullet, X3, Y3, p->angle + 180, 10);
-					bul4->settings(sBullet, X4, Y4, p->angle + 270, 10);
-
-					entities.push_back(bul1);
-					entities.push_back(bul2);
-					entities.push_back(bul3);
-					entities.push_back(bul4);
+					for (unsigned int i = 0; i < 4; i++) {
+						Entity *rBul = new rotateBullet();
+						int X = player->x + 30 * cos((player->angle + i * 90) * DEGTORAD);
+						int Y = player->y + 30 * sin((player->angle + i * 90) * DEGTORAD);
+						rBul->settings(sBullet, X, Y, (player->angle + 90 + i * 90), 10);
+						entities.push_back(rBul);
+					}
 				}
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-			p->angle += 3;
+			player->angle += 3;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-			p->angle -= 3;
+			player->angle -= 3;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-			p->thrust = true;
+			player->thrust = true;
 		else
-			p->thrust = false;
+			player->thrust = false;
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-			p->decelerate = true;
+			player->decelerate = true;
 
 		for (auto a : entities)
 			for (auto b : entities) {
@@ -441,9 +425,9 @@ int main() {
 						e->name = "explosion";
 						entities.push_back(e);
 
-						p->settings(sPlayer, W / 2, H / 2, 0, 20);
-						p->dx = 0;
-						p->dy = 0;
+						player->settings(sPlayer, W / 2, H / 2, 0, 20);
+						player->dx = 0;
+						player->dy = 0;
 					}
 				}
 
@@ -459,7 +443,7 @@ int main() {
 					}
 				}
 
-				if (a->name == "enemy" && b->name == "bullet") {
+				if ((a->name == "enemy" && b->name == "bullet") || (a->name == "enemy" && b->name == "rotateBullet")) {
 					if (isCollide(a, b)) {
 						a->hitPoints--;
 
@@ -485,18 +469,18 @@ int main() {
 						e->name = "explosion";
 						entities.push_back(e);
 
-						p->settings(sPlayer, W / 2, H / 2, 0, 20);
-						p->dx = 0;
-						p->dy = 0;
+						player->settings(sPlayer, W / 2, H / 2, 0, 20);
+						player->dx = 0;
+						player->dy = 0;
 					}
 				}
 
 			}
 
-		if (p->thrust)
-			p->anim = sPlayer_go;
+		if (player->thrust)
+			player->anim = sPlayer_go;
 		else
-			p->anim = sPlayer;
+			player->anim = sPlayer;
 
 		for (auto e : entities)
 			if (e->name == "explosion")
@@ -508,8 +492,6 @@ int main() {
 			a->settings(sRock, 0, rand() % H, rand() % 360, 25);
 			entities.push_back(a);
 		}
-
-		//if (rand)
 
 		for (auto i = entities.begin(); i != entities.end();) {
 			Entity *e = *i;
@@ -527,30 +509,16 @@ int main() {
 		}
 
 		if (Entity::countEntity == 0 && boss == 0) {
-			Enemy *en = new Enemy();
-			en->settings(sEnemy, 1000, 400, 90, 20);
-			en->hitPoints = 500;
-			entities.push_back(en);
+			Entity *enemy = new Enemy(*player);
+			enemy->settings(sEnemy, 1000, 400, 90, 20);
+			enemy->hitPoints = 500;
+			entities.push_back(enemy);
 			boss = 1;
 		}
 
 		for (auto a : entities) {
 			if (boss && a->name == "enemy") {
-				int dd = rand() % 2;
-				switch (dd) {
-				case 1:
-					//a->angle += rand() % 1; 
-					break;
-				case 2:
-					//a->angle -= rand() % 10; 
-					break;
-				default:
-					break;
-				}
 				a->move = true;
-			}
-			else {
-				a->move = false;
 			}
 		}
 
