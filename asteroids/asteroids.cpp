@@ -50,7 +50,7 @@ public:
 
 class Entity {
 public:
-	float x, y, dx, dy, R, angle;
+	double x, y, dx, dy, R, angle;
 	bool life;
 	bool move;
 	int hitPoints;
@@ -85,6 +85,14 @@ public:
 		circle.setOrigin(R, R);
 	}
 
+	double getX() {
+		return x;
+	}
+
+	double getY() {
+		return y;
+	}
+	
 	virtual ~Entity() {};
 };
 
@@ -234,8 +242,7 @@ public:
 class Enemy : public Entity {
 	Player *player_;
 public:
-	Enemy(Player &player) {
-		player_ = &player;
+	Enemy(Player* player) : player_(player) {
 		name = "enemy";
 		countEntity++;
 	}
@@ -246,19 +253,18 @@ public:
 
 	void update() {
 		if (move) {
-			dx = player_->x;
-			dy = player_->y;
-			dx += sqrt(angle * DEGTORAD) * 0.2;
-			dy += sqrt(angle * DEGTORAD) * 0.2;
-		}
-		else {
-			dx *= 0.99;
-			dy *= 0.99;
+			double distance = sqrt((player_->getX() - x) * (player_->getX() - x) + (player_->getY() - y) * (player_->getY() - y));
+
+			dx += (player_->getX() - x) / distance;
+			dy += (player_->getY() - y) / distance;
+
+			angle = (atan2((player_->getY() - y) * DEGTORAD, (player_->getX() - x) * DEGTORAD) * 180 / 3.14159265);
 		}
 
-		int maxSpeed = 3;
+		int maxSpeed = 1;
 
 		float speed = sqrt(dx * dx + dy * dy);
+
 		if (speed > maxSpeed) {
 			dx *= maxSpeed / speed;
 			dy *= maxSpeed / speed;
@@ -288,6 +294,8 @@ int main() {
 
 	sf::Texture t1, t2, t3, t4, t5, t6, t7, t8;
 
+	int amountBullets = 5;
+
 	t1.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\spaceship.png");
 	t2.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\background.jpg");
 	t3.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\explosions\\type_C.png");
@@ -299,6 +307,7 @@ int main() {
 
 	t1.setSmooth(true);
 	t2.setSmooth(true);
+	t8.setSmooth(true);
 
 	sf::Sprite background(t2);
 
@@ -313,12 +322,12 @@ int main() {
 	Animation sBullet(t5, 0, 0, 32, 64, 16, 0.8);
 	Animation sPlayer(t1, 40, 0, 40, 40, 1, 0);
 	Animation sPlayer_go(t1, 40, 40, 40, 40, 1, 0);
-	Animation sEnemy(t8, 0, 0, 224, 154, 1, 0);
+	Animation sEnemy(t8, 0, 0, 154, 224, 1, 0);
 	Animation sExplosion_ship(t7, 0, 0, 192, 192, 64, 0.5);
 
 	std::list<Entity*> entities;
 
-	for (int i = 0; i < 1; i++) {
+	for (int i = 1; i < 1; i++) {
 		switch (rand() % 2) {
 		case 0: {
 			Entity *aB = new asteroidBig();
@@ -372,11 +381,11 @@ int main() {
 			if (event.type == sf::Event::KeyPressed)
 				if (event.key.code == sf::Keyboard::S) {
 
-					for (unsigned int i = 0; i < 4; i++) {
+					for (unsigned int i = 0; i < amountBullets; i++) {
 						Entity *rBul = new rotateBullet();
-						int X = player->x + 30 * cos((player->angle + i * 90) * DEGTORAD);
-						int Y = player->y + 30 * sin((player->angle + i * 90) * DEGTORAD);
-						rBul->settings(sBullet, X, Y, (player->angle + 90 + i * 90), 10);
+						int X = player->x + 30 * cos((player->angle + i * (360 / amountBullets)) * DEGTORAD);
+						int Y = player->y + 30 * sin((player->angle + i * (360 / amountBullets)) * DEGTORAD);
+						rBul->settings(sBullet, X, Y, (player->angle + 90 + i * (360 / amountBullets)), 10);
 						entities.push_back(rBul);
 					}
 				}
@@ -396,7 +405,7 @@ int main() {
 
 		for (auto a : entities)
 			for (auto b : entities) {
-				if ((a->name == "asteroidBig" && b->name == "bullet") || (a->name == "asteroidSmall" && b->name == "bullet") || 
+				if ((a->name == "asteroidBig" && b->name == "bullet") || (a->name == "asteroidSmall" && b->name == "bullet") ||
 					(a->name == "asteroidBig" && b->name == "rotateBullet") || (a->name == "asteroidSmall" && b->name == "rotateBullet")) {
 					if (isCollide(a, b)) {
 						a->life = false;
@@ -509,9 +518,9 @@ int main() {
 		}
 
 		if (Entity::countEntity == 0 && boss == 0) {
-			Entity *enemy = new Enemy(*player);
-			enemy->settings(sEnemy, 1000, 400, 90, 20);
-			enemy->hitPoints = 500;
+			Entity *enemy = new Enemy(player);
+			enemy->settings(sEnemy, 1000, 400, 0, 20);
+			enemy->hitPoints = 10;
 			entities.push_back(enemy);
 			boss = 1;
 		}
