@@ -284,7 +284,7 @@ int	Entity::countEntity = 0;
 int main() {
 	srand(time(nullptr));
 	sf::RenderWindow app(sf::VideoMode(W, H), "Asteroids!");
-	// app.setFramerateLimit(60);
+	app.setFramerateLimit(60);
 
 	sf::Texture t1, t2, t3, t4, t5, t6, t7, t8;
 
