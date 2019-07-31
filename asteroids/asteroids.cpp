@@ -7,8 +7,8 @@
 #include <iostream>
 #include <vector>
 
-const int W = 1200;
-const int H = 800;
+const int W = 1800;
+const int H = 900;
 
 int boss = 0;
 
@@ -196,7 +196,7 @@ public:
 		dx = x0 + rotateBulletRadius * cos(angle++ * DEGTORAD);
 		dy = y0 + rotateBulletRadius * sin(angle++ * DEGTORAD);
 
-		int maxSpeed = 15;
+		int maxSpeed = 18;
 
 		float speed = sqrt(dx * dx + dy * dy);
 
@@ -319,7 +319,7 @@ int main() {
 	t3.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\explosions\\type_C.png");
 	t4.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\rock.png");
 	t5.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\fire_blue.png");
-	tFireRed.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\fire_blue.png");
+	tFireRed.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\fire_red.png");
 	t6.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\rock_small.png");
 	t7.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\explosions\\type_B.png");
 	t8.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\enemy.png");
@@ -504,6 +504,20 @@ int main() {
 					}
 				}
 
+				if (a->name == "enemyBullet" && b->name == "player") {
+					if (isCollide(a, b)) {
+						a->life = false;
+
+						Entity *e = new Entity();
+						e->settings(sExplosion_ship, a->x, a->y);
+						e->name = "explosion";
+						entities.push_back(e);
+
+						player->settings(sPlayer, W / 4, H / 4, 0, 20);
+						player->dx = 0;
+						player->dy = 0;
+					}
+				}
 			}
 
 		if (player->thrust)
@@ -547,6 +561,26 @@ int main() {
 
 		for (auto a : entities) {
 			if (boss && a->name == "enemy") {
+				double distance = sqrt((player->getX() - a->getX()) * (player->getX() - a->getX()) + (player->getY() - a->getY()) * (player->getY() - a->getY()));
+				if (distance < 500 && rand() % 15 == 3) {
+					for (unsigned int i = 0; i < 2; i++) {
+						Entity *bul = new enemyBullet();
+						int X = 0;
+						int Y = 0;
+						switch (i) {
+						case 0:
+							X = a->x + 15 * cos((a->angle - 90) * DEGTORAD);
+							Y = a->y + 15 * sin((a->angle - 90) * DEGTORAD);
+							break;
+						case 1:
+							X = a->x + 15 * cos((a->angle + 90) * DEGTORAD);
+							Y = a->y + 15 * sin((a->angle + 90) * DEGTORAD);
+							break;
+						}
+						bul->settings(sEnemyBullet, X, Y, a->angle, 10);
+						entities.push_back(bul);
+					}
+				}
 				a->move = true;
 			}
 		}
