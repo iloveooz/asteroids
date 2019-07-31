@@ -162,6 +162,23 @@ public:
 	}
 };
 
+class enemyBullet : public Entity {
+public:
+	enemyBullet() {
+		name = "enemyBullet";
+	}
+	void update() {
+		dx = cos(angle * DEGTORAD) * 10;
+		dy = sin(angle * DEGTORAD) * 10;
+
+		x += dx;
+		y += dy;
+
+		if (x > W || x < 0 || y > H || y < 0)
+			life = 0;
+	}
+};
+
 class rotateBullet : public Entity {
 	double rotateBulletRadius;
 	int x0;
@@ -293,6 +310,7 @@ int main() {
 	app.setFramerateLimit(60);
 
 	sf::Texture t1, t2, t3, t4, t5, t6, t7, t8;
+	sf::Texture tFireRed;
 
 	int amountBullets = 5;
 
@@ -301,6 +319,7 @@ int main() {
 	t3.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\explosions\\type_C.png");
 	t4.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\rock.png");
 	t5.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\fire_blue.png");
+	tFireRed.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\fire_blue.png");
 	t6.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\rock_small.png");
 	t7.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\explosions\\type_B.png");
 	t8.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\enemy.png");
@@ -320,6 +339,7 @@ int main() {
 	Animation sRock(t4, 0, 0, 64, 64, 16, 0.2);
 	Animation sRock_small(t6, 0, 0, 64, 64, 16, 0.2);
 	Animation sBullet(t5, 0, 0, 32, 64, 16, 0.8);
+	Animation sEnemyBullet(tFireRed, 0, 0, 32, 64, 16, 0.8);
 	Animation sPlayer(t1, 40, 0, 40, 40, 1, 0);
 	Animation sPlayer_go(t1, 40, 40, 40, 40, 1, 0);
 	Animation sEnemy(t8, 0, 0, 154, 224, 1, 0);
