@@ -7,6 +7,8 @@
 #include <iostream>
 #include <vector>
 
+// asteroids 0.0.1
+
 const int W = 1800;
 const int H = 900;
 
@@ -314,15 +316,15 @@ int main() {
 
 	int amountBullets = 5;
 
-	t1.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\spaceship.png");
-	t2.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\background.jpg");
-	t3.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\explosions\\type_C.png");
-	t4.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\rock.png");
-	t5.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\fire_blue.png");
-	tFireRed.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\fire_red.png");
-	t6.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\rock_small.png");
-	t7.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\explosions\\type_B.png");
-	t8.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\images\\enemy.png");
+	t1.loadFromFile("C:\\git\\asteroids\\Debug\\images\\spaceship.png");
+	t2.loadFromFile("C:\\git\\asteroids\\Debug\\images\\background.jpg");
+	t3.loadFromFile("C:\\git\\asteroids\\Debug\\images\\explosions\\type_C.png");
+	t4.loadFromFile("C:\\git\\asteroids\\Debug\\images\\rock.png");
+	t5.loadFromFile("C:\\git\\asteroids\\Debug\\images\\fire_blue.png");
+	tFireRed.loadFromFile("C:\\git\\asteroids\\Debug\\images\\fire_red.png");
+	t6.loadFromFile("C:\\git\\asteroids\\Debug\\images\\rock_small.png");
+	t7.loadFromFile("C:\\git\\asteroids\\Debug\\images\\explosions\\type_B.png");
+	t8.loadFromFile("C:\\git\\asteroids\\Debug\\images\\enemy.png");
 
 	t1.setSmooth(true);
 	t2.setSmooth(true);
@@ -331,7 +333,7 @@ int main() {
 	sf::Sprite background(t2);
 
 	sf::Font font;
-	font.loadFromFile("C:\\git\\2017\\Asteroids\\Debug\\fonts\\times.ttf");
+	font.loadFromFile("C:\\git\\asteroids\\Debug\\fonts\\times.ttf");
 
 	sf::Text text("", font, 20);
 

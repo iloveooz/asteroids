@@ -5,3 +5,4 @@
 *.pdb
 *.exe
 *.ilk
+/asteroids/x64/Debug
